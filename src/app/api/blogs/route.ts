@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     const category = formData.get('category') as string;
     const status = formData.get('status') as string;
     const image = formData.get('image') as File;
+    const youtubeUrl = formData.get('youtubeUrl') as string;
 
     const slug = title.toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
@@ -54,14 +55,19 @@ export async function POST(request: Request) {
       imageUrl = `/uploads/${filename}`;
     }
 
+    console.log('Received YouTube URL:', youtubeUrl);
+
     const blog = await Blog.create({
       title,
       content,
+      content2: formData.get('content2') || '',
+      content3: formData.get('content3') || '',
       excerpt,
       category,
       status,
       slug,
       imageUrl,
+      youtubeUrl: youtubeUrl || '',
       date: new Date().toISOString()
     });
 

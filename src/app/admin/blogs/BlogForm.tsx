@@ -24,9 +24,22 @@ export default function BlogForm({ onSubmit, initialData }: BlogFormProps) {
     }
   };
 
+  const validateYoutubeUrl = (url: string) => {
+    if (!url) return true;
+    const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
+    return pattern.test(url);
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    const youtubeUrl = formData.get('youtubeUrl') as string;
+    
+    if (youtubeUrl && !validateYoutubeUrl(youtubeUrl)) {
+      alert('Please enter a valid YouTube URL');
+      return;
+    }
+    
     onSubmit(formData);
   };
 
@@ -75,10 +88,37 @@ export default function BlogForm({ onSubmit, initialData }: BlogFormProps) {
           <label className="block text-sm font-medium text-gray-700">Content</label>
           <textarea
             name="content"
-            defaultValue={initialData?.content}
-            rows={10}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
             required
+            defaultValue={initialData?.content}
+            rows={6}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Write your main content here..."
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Additional Content (Optional)
+          </label>
+          <textarea
+            name="content2"
+            defaultValue={initialData?.content2}
+            rows={4}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Add more content here (optional)..."
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Extra Content (Optional)
+          </label>
+          <textarea
+            name="content3"
+            defaultValue={initialData?.content3}
+            rows={4}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Add extra content here (optional)..."
           />
         </div>
 
@@ -120,6 +160,18 @@ export default function BlogForm({ onSubmit, initialData }: BlogFormProps) {
               className="hidden"
             />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">YouTube URL (Optional)</label>
+          <input
+            type="url"
+            name="youtubeUrl"
+            defaultValue={initialData?.youtubeUrl}
+            placeholder="https://www.youtube.com/watch?v=..."
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <p className="mt-1 text-sm text-gray-500">Add a YouTube video URL if you want to embed it in your blog post</p>
         </div>
       </div>
 
