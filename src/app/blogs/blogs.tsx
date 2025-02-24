@@ -120,26 +120,49 @@ export default function Blogs() {
             <Link href={`/blogs/${post.slug}`} key={post._id}>
               <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 group">
                 {post.imageUrl && (
-                  <div className="h-56 w-full overflow-hidden relative">
-                    <img 
-                      src={post.imageUrl} 
-                      alt={post.title}
-                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute top-4 right-4">
-                      <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-blue-800 rounded-full text-xs font-medium shadow-lg">
+                  <div className="relative group">
+                    {/* Image Container with Perfect Aspect Ratio */}
+                    <div className="aspect-[16/9] overflow-hidden rounded-t-2xl">
+                      <img 
+                        src={post.imageUrl} 
+                        alt={post.title}
+                        className="w-full h-full object-cover transform group-hover:scale-110 transition-all duration-1000 ease-in-out" 
+                      />
+                      
+                      {/* Enhanced Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 ease-in-out" />
+                      
+                      {/* Shimmer Effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500 ease-in-out" />
+                    </div>
+
+                    {/* Category Badge with Enhanced Design */}
+                    <div className="absolute top-4 right-4 z-10">
+                      <span className="px-4 py-2 bg-white/95 backdrop-blur-md text-blue-800 rounded-full text-xs font-semibold shadow-lg transform -translate-y-1 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 border border-blue-100/50">
                         {post.category}
                       </span>
                     </div>
+
+                    {/* Date Badge with Glass Effect */}
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="px-4 py-2 bg-black/40 backdrop-blur-md text-white rounded-full text-xs font-medium transform -translate-y-1 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 border border-white/10">
+                        {new Date(post.date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+
+                    {/* YouTube Indicator with Enhanced Animation */}
                     {post.youtubeUrl && (
-                      <div className="absolute bottom-4 right-4">
-                        <span className="px-3 py-1 bg-red-600/90 backdrop-blur-sm text-white rounded-full text-xs font-medium shadow-lg flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <div className="absolute bottom-4 right-4 z-10">
+                        <span className="px-4 py-2 bg-red-600/90 backdrop-blur-md text-white rounded-full text-xs font-semibold shadow-lg flex items-center gap-2 transform translate-y-1 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 border border-red-500/30">
+                          <svg className="w-4 h-4 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
                             <path fill="white" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                           </svg>
-                          Video
+                          Watch Video
                         </span>
                       </div>
                     )}

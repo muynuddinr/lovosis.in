@@ -36,6 +36,11 @@ export default function AdminBlogs() {
         ? `/api/blogs/${editingBlog._id}` 
         : '/api/blogs';
         
+      // If editing and no new image is selected, don't send the empty image field
+      if (editingBlog && formData.get('image') instanceof File && !(formData.get('image') as File).size) {
+        formData.delete('image');
+      }
+
       const response = await fetch(url, {
         method: editingBlog ? 'PUT' : 'POST',
         body: formData,
