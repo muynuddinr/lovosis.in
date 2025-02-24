@@ -114,34 +114,64 @@ export default function Blogs() {
         {/* Blog Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPosts.map((post) => (
-            <div
-              key={post._id}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-            >
-              <div className="h-48 overflow-hidden">
-                <img
-                  src={post.imageUrl}
-                  alt={post.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <div className="text-sm text-blue-600 font-semibold mb-2">
-                  {post.category} • {post.date}
+            <Link href={`/blogs/${post.slug}`} key={post._id}>
+              <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 group">
+                {post.imageUrl && (
+                  <div className="h-56 w-full overflow-hidden relative">
+                    <img 
+                      src={post.imageUrl} 
+                      alt={post.title}
+                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute top-4 right-4">
+                      <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-blue-800 rounded-full text-xs font-medium shadow-lg">
+                        {post.category}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <div className="p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-blue-600 text-sm font-medium">
+                      {new Date(post.date).toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                    {post.title}
+                  </h3>
+                  <div className="space-y-4">
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {post.excerpt}
+                    </p>
+                    <div className="border-t border-gray-100 pt-4">
+                      <div className="flex justify-between items-center">
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-500 line-clamp-2 prose prose-sm">
+                            {post.content.slice(0, 120)}...
+                          </p>
+                        </div>
+                        <span className="text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap ml-4 flex items-center gap-1 group-hover:gap-2 transition-all">
+                          Read more 
+                          <svg 
+                            className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <h2 className="text-xl font-bold text-gray-800 mb-2">
-                  {post.title}
-                </h2>
-                <p className="text-gray-600 mb-4">
-                  {post.excerpt}
-                </p>
-                <Link href={`/blogs/${post.slug}`}>
-                  <button className="text-blue-600 font-semibold hover:text-blue-800 transition-colors duration-300">
-                    Read More →
-                  </button>
-                </Link>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
