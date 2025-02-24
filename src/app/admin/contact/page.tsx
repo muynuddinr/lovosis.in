@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { IoTrashOutline, IoMailOutline, IoCheckmarkCircleOutline, IoFilterOutline, IoSearchOutline, IoRefreshOutline, IoChevronDownOutline, IoChevronUpOutline } from 'react-icons/io5';
 import React from 'react';
+import toast from 'react-hot-toast';
 
 interface Message {
   _id: string;
@@ -31,6 +32,8 @@ export default function AdminContact() {
   const [showModal, setShowModal] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [currentStats, setCurrentStats] = useState(stats);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
 
   const statusOptions = ['Unread', 'Read', 'Pending', 'Resolved'];
 
@@ -102,18 +105,31 @@ export default function AdminContact() {
     }
   };
 
-  const deleteMessage = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this message?')) {
-      try {
-        const response = await fetch(`/api/contact/${id}`, {
-          method: 'DELETE',
-        });
-        if (response.ok) {
-          fetchMessages();
-        }
-      } catch (error) {
-        console.error('Failed to delete message:', error);
+  const handleDeleteClick = (id: string) => {
+    setMessageToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!messageToDelete) return;
+
+    try {
+      const response = await fetch(`/api/contact/${messageToDelete}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast.success('Message deleted successfully');
+        fetchMessages();
+      } else {
+        toast.error('Failed to delete message');
       }
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+      toast.error('Failed to delete message');
+    } finally {
+      setShowDeleteModal(false);
+      setMessageToDelete(null);
     }
   };
 
@@ -277,7 +293,7 @@ export default function AdminContact() {
                         </button>
                         <button 
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          onClick={() => deleteMessage(message._id)}
+                          onClick={() => handleDeleteClick(message._id)}
                         >
                           <IoTrashOutline className="text-xl" />
                         </button>
@@ -317,6 +333,29 @@ export default function AdminContact() {
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <h2 className="text-xl font-bold mb-4">Delete Confirmation</h2>
+            <p className="text-gray-700 mb-6">Are you sure you want to delete this message? This action cannot be undone.</p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Delete
               </button>
             </div>
           </div>

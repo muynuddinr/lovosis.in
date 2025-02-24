@@ -31,4 +31,30 @@ export async function PATCH(
       { status: 500 }
     );
   }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await connectDB();
+    const { id } = params;
+    
+    const deletedMessage = await Contact.findByIdAndDelete(id);
+    
+    if (!deletedMessage) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Message not found' 
+      }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: deletedMessage });
+  } catch (error) {
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Failed to delete message' 
+    }, { status: 500 });
+  }
 } 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { IoAddOutline, IoTrashOutline, IoMailOutline, IoRefreshOutline, IoSearchOutline, IoChevronDownOutline } from 'react-icons/io5';
+import toast from 'react-hot-toast';
 
 interface Subscriber {
   _id: string;
@@ -25,6 +26,8 @@ export default function AdminNewsletter() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentStats, setCurrentStats] = useState(initialStats);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [subscriberToDelete, setSubscriberToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSubscribers();
@@ -67,18 +70,30 @@ export default function AdminNewsletter() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this subscriber?')) return;
+  const handleDeleteClick = (id: string) => {
+    setSubscriberToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!subscriberToDelete) return;
 
     try {
-      const response = await fetch(`/api/newsletter/${id}`, {
+      const response = await fetch(`/api/newsletter/${subscriberToDelete}`, {
         method: 'DELETE',
       });
       if (response.ok) {
+        toast.success('Subscriber deleted successfully');
         fetchSubscribers();
+      } else {
+        toast.error('Failed to delete subscriber');
       }
     } catch (error) {
       console.error('Failed to delete subscriber:', error);
+      toast.error('Failed to delete subscriber');
+    } finally {
+      setShowDeleteModal(false);
+      setSubscriberToDelete(null);
     }
   };
 
@@ -220,8 +235,8 @@ export default function AdminNewsletter() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleDelete(subscriber._id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        onClick={() => handleDeleteClick(subscriber._id)}
                       >
                         <IoTrashOutline className="text-xl" />
                       </button>
@@ -233,6 +248,29 @@ export default function AdminNewsletter() {
           </table>
         </div>
       </div>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <h2 className="text-xl font-bold mb-4">Delete Confirmation</h2>
+            <p className="text-gray-700 mb-6">Are you sure you want to delete this subscriber? This action cannot be undone.</p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
