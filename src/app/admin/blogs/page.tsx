@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { IoAddOutline, IoTrashOutline, IoCreateOutline } from 'react-icons/io5';
+import { IoAddOutline, IoTrashOutline, IoCreateOutline, IoChevronDownOutline, IoSearchOutline } from 'react-icons/io5';
 import { FaNewspaper, FaEdit, FaEye } from 'react-icons/fa';
 import BlogForm from './BlogForm';
 import { BlogPost } from '../../types/blog';
@@ -11,6 +11,7 @@ export default function AdminBlogs() {
   const [editingBlog, setEditingBlog] = useState<any>(null);
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchBlogs();
@@ -80,9 +81,8 @@ export default function AdminBlogs() {
     }
   };
 
-  const handleStatusToggle = async (blog: BlogPost) => {
+  const handleStatusToggle = async (blog: BlogPost, newStatus: string) => {
     try {
-      const newStatus = blog.status === 'Published' ? 'Draft' : 'Published';
       const formData = new FormData();
       formData.append('status', newStatus);
 
@@ -108,6 +108,11 @@ export default function AdminBlogs() {
     published: blogs.filter(blog => blog.status === 'Published').length,
     draft: blogs.filter(blog => blog.status === 'Draft').length
   };
+
+  const filteredBlogs = blogs.filter(blog => 
+    blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    blog.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="p-6">
@@ -161,6 +166,22 @@ export default function AdminBlogs() {
         </div>
       </div>
 
+      {/* Search Section */}
+      <div className="mb-6">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search blogs by title or category..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2 pl-10 pr-4 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <IoSearchOutline className="text-gray-400 text-lg" />
+          </div>
+        </div>
+      </div>
+
       {/* Blog Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -198,22 +219,32 @@ export default function AdminBlogs() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {blogs.map((blog) => (
+            {filteredBlogs.map((blog) => (
               <tr key={blog._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">{blog.title}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{blog.category}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{new Date(blog.date).toLocaleDateString()}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <button
-                    onClick={() => handleStatusToggle(blog)}
-                    className={`px-2 py-1 text-xs font-medium rounded-full cursor-pointer ${
+                  <div className="flex items-center gap-4">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                       blog.status === 'Published' 
-                        ? 'bg-green-100 text-green-800 hover:bg-green-200' 
-                        : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                    }`}
-                  >
-                    {blog.status}
-                  </button>
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {blog.status}
+                    </span>
+                    <div className="relative">
+                      <select
+                        value={blog.status}
+                        onChange={(e) => handleStatusToggle(blog, e.target.value)}
+                        className="appearance-none bg-white border border-gray-200 rounded-lg px-3 py-1 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="Published">Published</option>
+                        <option value="Draft">Draft</option>
+                      </select>
+                      <IoChevronDownOutline className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex gap-2">

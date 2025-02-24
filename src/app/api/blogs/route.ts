@@ -5,10 +5,15 @@ import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await connectDB();
-    const blogs = await Blog.find({ status: 'Published' }).sort({ createdAt: -1 });
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+    
+    const query = status ? { status } : {};
+    const blogs = await Blog.find(query).sort({ createdAt: -1 });
+    
     return NextResponse.json({ success: true, data: blogs });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch blogs' }, { status: 500 });

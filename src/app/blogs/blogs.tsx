@@ -50,7 +50,7 @@ export default function Blogs() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await fetch('/api/blogs');
+        const response = await fetch('/api/blogs?status=Published');
         const data = await response.json();
         if (data.success) {
           setBlogs(data.data);
