@@ -1,55 +1,68 @@
 import React from 'react';
+import Link from 'next/link';
 
 interface Service {
   title: string;
   description: string;
   icon?: string;
+  path?: string;
 }
 
 const services: Service[] = [
   {
-    title: "Web Development",
-    description: "Custom website development using modern technologies and frameworks.",
-    icon: "💻"
+    title: "IT Services",
+    description: "Comprehensive IT solutions including software development, cloud computing, cybersecurity, and digital transformation services to optimize your business operations.",
+    icon: "💻",
+    path: "/it-services"
   },
   {
-    title: "Mobile Development",
-    description: "Native and cross-platform mobile application development.",
-    icon: "📱"
-  },
-  {
-    title: "Cloud Solutions",
-    description: "Cloud infrastructure setup and maintenance services.",
-    icon: "☁️"
+    title: "Electronics Manufacturing",
+    description: "State-of-the-art electronics manufacturing services including PCB assembly, product design, testing, and quality assurance for various industrial applications.",
+    icon: "🔧",
+    path: "/electronics-manufacturing"
   }
 ];
 
 const ServicesPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+        <div className="text-center relative">
+          <div className="absolute inset-0 flex items-center justify-center -z-10">
+            <div className="w-48 h-48 bg-blue-100 rounded-full filter blur-3xl opacity-30"></div>
+            <div className="w-48 h-48 bg-purple-100 rounded-full filter blur-3xl opacity-30 -ml-10"></div>
+          </div>
+          <h2 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 sm:text-6xl">
             Our Services
           </h2>
-          <p className="mt-4 text-xl text-gray-500">
-            We offer a wide range of digital solutions to help your business grow
+          <p className="mt-6 text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Delivering excellence in IT solutions and electronics manufacturing to power your business innovation
           </p>
         </div>
 
-        <div className="mt-20 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-24 grid grid-cols-1 gap-16 sm:grid-cols-2">
           {services.map((service, index) => (
             <div
               key={index}
-              className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
+              className="group bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl p-12 hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100/20"
             >
-              <div className="text-4xl mb-4">{service.icon}</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <div className="text-6xl mb-8 bg-gradient-to-br from-blue-100 to-purple-100 w-24 h-24 rounded-2xl flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                {service.icon}
+              </div>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
                 {service.title}
               </h3>
-              <p className="text-gray-500">
+              <p className="text-gray-600 leading-relaxed text-lg">
                 {service.description}
               </p>
+              <Link href={service.path || '#'}>
+                <button className="mt-8 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/30 transform hover:-translate-y-0.5 transition-all duration-300 flex items-center group">
+                  Learn More
+                  <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </Link>
             </div>
           ))}
         </div>

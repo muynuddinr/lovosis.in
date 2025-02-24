@@ -1,6 +1,8 @@
 "use client"
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import logo from '../../../public/lovosis logo.png';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,6 +18,13 @@ const Navbar = () => {
           {/* Logo/Brand */}
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:scale-110 transition-all duration-300 flex items-center gap-2 hover:drop-shadow-2xl">
+              <Image 
+                src={logo.src} 
+                alt="Lovosis Logo" 
+                width={48}
+                height={48}
+                className="object-contain"
+              />
               <span>lovosis</span>
             </Link>
           </div>
