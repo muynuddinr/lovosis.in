@@ -1,30 +1,191 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IoAddOutline, IoTrashOutline, IoCreateOutline } from 'react-icons/io5';
+import { FaNewspaper, FaEdit, FaEye } from 'react-icons/fa';
+import BlogForm from './BlogForm';
+import { BlogPost } from '../../types/blog';
 
 export default function AdminBlogs() {
-  const [blogs, setBlogs] = useState([
-    {
-      id: 1,
-      title: "Getting Started with Next.js",
-      category: "Development",
-      date: "March 15, 2024",
-      status: "Published"
-    },
-    // Add more blogs as needed
-  ]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingBlog, setEditingBlog] = useState<any>(null);
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  const fetchBlogs = async () => {
+    try {
+      const response = await fetch('/api/blogs');
+      const data = await response.json();
+      if (data.success) {
+        setBlogs(data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch blogs:', error);
+    }
+    setLoading(false);
+  };
+
+  const handleSubmit = async (formData: FormData) => {
+    try {
+      const url = editingBlog 
+        ? `/api/blogs/${editingBlog._id}` 
+        : '/api/blogs';
+        
+      const response = await fetch(url, {
+        method: editingBlog ? 'PUT' : 'POST',
+        body: formData,
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setShowForm(false);
+        setEditingBlog(null);
+        fetchBlogs();
+      } else {
+        alert(data.error || 'Failed to save blog post');
+      }
+    } catch (error) {
+      console.error('Failed to save blog post:', error);
+      alert('Failed to save blog post');
+    }
+  };
+
+  const handleEdit = (blog: BlogPost) => {
+    setEditingBlog(blog);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (blogId: string) => {
+    if (window.confirm('Are you sure you want to delete this blog post?')) {
+      try {
+        const response = await fetch(`/api/blogs/${blogId}`, {
+          method: 'DELETE',
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          fetchBlogs();
+        } else {
+          alert(data.error || 'Failed to delete blog post');
+        }
+      } catch (error) {
+        console.error('Failed to delete blog post:', error);
+        alert('Failed to delete blog post');
+      }
+    }
+  };
+
+  const handleStatusToggle = async (blog: BlogPost) => {
+    try {
+      const newStatus = blog.status === 'Published' ? 'Draft' : 'Published';
+      const formData = new FormData();
+      formData.append('status', newStatus);
+
+      const response = await fetch(`/api/blogs/${blog._id}`, {
+        method: 'PUT',
+        body: formData,
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        fetchBlogs();
+      } else {
+        alert(data.error || 'Failed to update status');
+      }
+    } catch (error) {
+      console.error('Failed to update status:', error);
+      alert('Failed to update status');
+    }
+  };
+
+  const stats = {
+    total: blogs.length,
+    published: blogs.filter(blog => blog.status === 'Published').length,
+    draft: blogs.filter(blog => blog.status === 'Draft').length
+  };
 
   return (
-    <div>
+    <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Blogs Management</h1>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700">
+        <button
+          onClick={() => setShowForm(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
+        >
           <IoAddOutline className="text-xl" />
           Add Blog
         </button>
       </div>
 
+      {/* Stats Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <FaNewspaper className="text-2xl text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Total Blogs</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-green-100 rounded-lg">
+              <FaEye className="text-2xl text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Published</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.published}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-yellow-100 rounded-lg">
+              <FaEdit className="text-2xl text-yellow-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Drafts</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.draft}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Blog Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">
+              {editingBlog ? 'Edit Blog Post' : 'Create New Blog Post'}
+            </h2>
+            <BlogForm
+              onSubmit={handleSubmit}
+              initialData={editingBlog}
+            />
+            <button
+              onClick={() => {
+                setShowForm(false);
+                setEditingBlog(null);
+              }}
+              className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Table Section */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -38,21 +199,34 @@ export default function AdminBlogs() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {blogs.map((blog) => (
-              <tr key={blog.id} className="hover:bg-gray-50">
+              <tr key={blog._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">{blog.title}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{blog.category}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{blog.date}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{new Date(blog.date).toLocaleDateString()}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                  <button
+                    onClick={() => handleStatusToggle(blog)}
+                    className={`px-2 py-1 text-xs font-medium rounded-full cursor-pointer ${
+                      blog.status === 'Published' 
+                        ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                        : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                    }`}
+                  >
                     {blog.status}
-                  </span>
+                  </button>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex gap-2">
-                    <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                    <button 
+                      onClick={() => handleEdit(blog)}
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                    >
                       <IoCreateOutline className="text-xl" />
                     </button>
-                    <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg">
+                    <button 
+                      onClick={() => handleDelete(blog._id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                    >
                       <IoTrashOutline className="text-xl" />
                     </button>
                   </div>

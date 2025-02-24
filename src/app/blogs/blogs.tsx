@@ -1,43 +1,72 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 interface BlogPost {
-  id: number;
+  _id: string;
   title: string;
   excerpt: string;
   date: string;
   category: string;
   imageUrl: string;
+  slug: string;
+  status: 'Draft' | 'Published';
+  content: string;
 }
 
 const dummyBlogPosts: BlogPost[] = [
   {
-    id: 1,
+    _id: "1",
     title: "Getting Started with Next.js",
     excerpt: "Learn how to build modern web applications with Next.js framework",
     date: "March 15, 2024",
     category: "Development",
-    imageUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6"
+    imageUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6",
+    slug: "getting-started-with-nextjs",
+    status: "Published",
+    content: ""
   },
   {
-    id: 2,
+    _id: "2",
     title: "The Power of TailwindCSS",
     excerpt: "Discover how TailwindCSS can revolutionize your styling workflow",
     date: "March 12, 2024",
     category: "Design",
-    imageUrl: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8"
+    imageUrl: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8",
+    slug: "the-power-of-tailwindcss",
+    status: "Published",
+    content: ""
   },
   // Add more dummy blog posts as needed
 ];
 
 export default function Blogs() {
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await fetch('/api/blogs');
+        const data = await response.json();
+        if (data.success) {
+          setBlogs(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch blogs:', error);
+      }
+      setLoading(false);
+    };
+
+    fetchBlogs();
+  }, []);
 
   const categories = ["All", "Development", "Design", "Technology", "Business"];
 
-  const filteredPosts = dummyBlogPosts.filter(post => {
+  const filteredPosts = blogs.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "All" || post.category === selectedCategory;
@@ -86,7 +115,7 @@ export default function Blogs() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPosts.map((post) => (
             <div
-              key={post.id}
+              key={post._id}
               className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               <div className="h-48 overflow-hidden">
@@ -106,9 +135,11 @@ export default function Blogs() {
                 <p className="text-gray-600 mb-4">
                   {post.excerpt}
                 </p>
-                <button className="text-blue-600 font-semibold hover:text-blue-800 transition-colors duration-300">
-                  Read More →
-                </button>
+                <Link href={`/blogs/${post.slug}`}>
+                  <button className="text-blue-600 font-semibold hover:text-blue-800 transition-colors duration-300">
+                    Read More →
+                  </button>
+                </Link>
               </div>
             </div>
           ))}
